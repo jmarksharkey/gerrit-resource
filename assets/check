@@ -15,7 +15,6 @@ payload=$TMPDIR/gerrit-resource-request
 # echo "1=$1"
 
 cat > $payload <&0
-echo "payload=$(cat $payload)"
 
 load_pubkey $payload
 configure_git_ssl_verification $payload
@@ -33,6 +32,7 @@ tag_filter=$(jq -r '.source.tag_filter // ""' < $payload)
 git_config_payload=$(jq -r '.source.git_config // []' < $payload)
 ref=$(jq -r '.version.ref // ""' < $payload)
 skip_ci_disabled=$(jq -r '.source.disable_ci_skip // false' < $payload)
+status=$(jq -r '.source.status // "merged"' < $payload)
 if [ -n "$hostname" ]; then
   url="$hostname"
   if [ -n "$username" ]; then
@@ -97,7 +97,7 @@ fi
 # echo "$result"
 
 # Check for any open changes that have been made to the project
-query="status:open"
+query="status:$status"
 append_to_query() {
     if [ -n "$2" ]; then
         query="$query $1:$2"
